@@ -23,8 +23,7 @@
     "electron": "^26.4.0"
   },
   "dependencies": {
-    "serialport": "^10.3.0",
-    "tableify": "^1.1.1"
+    "serialport": "^10.3.0"
   },
   "engines": {
     "node": "18.16.1",
