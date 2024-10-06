@@ -6,12 +6,21 @@ const { SerialPort } = require('serialport');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let selectedSerial
+
+const loadScreen = (w, name) => {
+    w.loadURL(url.format({
+        pathname: path.join(__dirname, `${name}/index.html`),
+        protocol: 'file:',
+        slashes: true
+    }))
+}
 
 function createWindow() {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 1000,
+        width: 1500,
+        height: 1100,
         backgroundColor: "#F2E5BF",
         webPreferences: {
             nodeIntegration: true, // to allow require
@@ -21,11 +30,7 @@ function createWindow() {
     })
 
     // and load the index.html of the app.
-    mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'port-select/index.html'),
-        protocol: 'file:',
-        slashes: true
-    }))
+    loadScreen(mainWindow, 'port-select')
 
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
@@ -56,11 +61,16 @@ app.on('ready', () => {
     ipcMain.on('selectSerialPort', (evt, p) => {
         console.log(`Serial port selected: ${p}`);
         console.log(`sender: ${evt.sender}`)
-        evt.sender.loadURL(url.format({
-            pathname: path.join(__dirname, 'game/index.html'),
-            protocol: 'file:',
-            slashes: true
-        }))
+        selectedSerial = p
+        loadScreen(evt.sender, 'game')
+    })
+
+    ipcMain.on('getSelectedSerialPort', (evt, p) => {
+        evt.reply('replySelectedSerialPort', selectedSerial)
+    })
+
+    ipcMain.on('viewSerialSelectScreen', (evt, p) => {
+        loadScreen(evt.sender, 'port-select')
     })
 })
 

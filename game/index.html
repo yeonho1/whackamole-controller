@@ -5,14 +5,29 @@
     <meta charset="UTF-8">
     <title>두더지 잡기 게임</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        table { border-collapse: collapse; }
-        table, th, td { border: 1px solid black; }
-    </style>
 </head>
 
 <body>
     <h1>두더지 잡기 게임 <span class="h1-little">by. 휘문고등학교 기계공학부</span></h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>BLUE</th>
+                <th>RED</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="blue-score">0</td>
+                <td id="red-score">0</td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="full">게임 시작하기</button>
+    <hr>
+    <p>Serial: <span class="portpath" id="selected-port"></span> <button class="small" id="change-port" onclick="changeSerial()">변경</button> / 상태: <span id="arduino-status">확인 중...</span></p>
+    <p class="small">버전 정보: Node.js <span id="node-version"></span>, Chromium <span id="chrome-version"></span>, Electron <span id="electron-version"></span>, and Serialport <span id="serialport-version"></span></p>
 </body>
 
 <script src="./renderer.js"></script>

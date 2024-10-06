@@ -5,12 +5,12 @@ body {
 
 h1 {
     font-family: 'KingSejongInstitute';
-    font-size: 25pt;
+    font-size: 50pt;
     text-align: center;
 }
 
 .h1-little {
-    font-size: 17pt;
+    font-size: 30pt;
 }
 
 button {
@@ -23,4 +23,35 @@ button {
     padding: 10px;
     font-family: inherit;
     font-size: inherit;
+}
+
+table {
+    width: 100%;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th {
+    font-size: 60pt;
+    height: 100px;
+}
+
+td {
+    font-size: 180pt;
+    height: 600px;
+}
+
+button.full {
+    width: 100%;
+}
+
+.small {
+    font-size: 10pt;
+}
+
+.portpath {
+    font-family: 'D2coding ligature';
 }
