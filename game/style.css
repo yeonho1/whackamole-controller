@@ -27,25 +27,36 @@ button {
 
 table {
     width: 100%;
-    margin-top: 50px;
-    margin-bottom: 20px;
     text-align: center;
     border-collapse: collapse;
     table-layout: fixed;
 }
 
-th {
+table.scoreboard {
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+table.scoreboard > thead {
     font-size: 60pt;
     height: 100px;
 }
 
-td {
+table.scoreboard > tbody {
     font-size: 180pt;
     height: 600px;
 }
 
 button.full {
     width: 100%;
+}
+
+button.red {
+    background-color: #D91656;
+}
+
+button:disabled {
+    opacity: 70%;
 }
 
 .small {

@@ -10,7 +10,7 @@
 <body>
     <h1>두더지 잡기 게임 <span class="h1-little">by. 휘문고등학교 기계공학부</span></h1>
 
-    <table>
+    <table class="scoreboard">
         <thead>
             <tr>
                 <th>BLUE</th>
@@ -24,7 +24,14 @@
             </tr>
         </tbody>
     </table>
-    <button class="full">게임 시작하기</button>
+    <table>
+        <tbody>
+            <tr>
+                <td><button class="full">게임 시작하기</button></td>
+                <td><button class="full red" disabled>게임 종료하기</button></td>
+            </tr>
+        </tbody>
+    </table>
     <hr>
     <p>Serial: <span class="portpath" id="selected-port"></span> <button class="small" id="change-port" onclick="changeSerial()">변경</button> / 상태: <span id="arduino-status">확인 중...</span></p>
     <p class="small">버전 정보: Node.js <span id="node-version"></span>, Chromium <span id="chrome-version"></span>, Electron <span id="electron-version"></span>, and Serialport <span id="serialport-version"></span></p>
