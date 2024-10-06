@@ -5,24 +5,24 @@
 const { ipcRenderer } = require('electron');
 
 const createButtonHTML = (id, text) => {
-  return `<button class="full" id="select-${id}" onclick="selectPort(${id})">${text}</button>`;
+  return `<button class="full" id="select-${id}" onclick="selectPort(${id})">${text}</button>`
 }
 
-let portList;
+let portList
 
 const renderSerialPortList = () => {
   if (portList.length === 0) {
     document.getElementById('error').textContent = 'No ports discovered'
   }
-  let tableHTML = '';
+  let tableHTML = ''
   portList.forEach((x, id) => {
-    tableHTML += `<tr><td class="portpath">${x.path}</td><td class="center button">${createButtonHTML(id, '선택')}</td></tr>`;
-  });
-  document.getElementById('ports-list').innerHTML = tableHTML;
+    tableHTML += `<tr><td class="portpath">${x.path}</td><td class="center button">${createButtonHTML(id, '선택')}</td></tr>`
+  })
+  document.getElementById('ports-list').innerHTML = tableHTML
 }
 
 const selectPort = (id) => {
-  document.getElementById("selected-port").innerHTML = portList[id].path || "오류: 잘못된 선택입니다.";
+  document.getElementById("selected-port").innerHTML = portList[id].path || "오류: 잘못된 선택입니다."
 }
 
 const requestSerialPortList = () => {
