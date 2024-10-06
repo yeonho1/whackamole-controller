@@ -23,6 +23,7 @@ const renderSerialPortList = () => {
 
 const selectPort = (id) => {
   document.getElementById("selected-port").innerHTML = portList[id].path || "오류: 잘못된 선택입니다."
+  ipcRenderer.send('selectSerialPort', portList[id].path)
 }
 
 const requestSerialPortList = () => {

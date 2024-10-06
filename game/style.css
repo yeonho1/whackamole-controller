@@ -1,0 +1,26 @@
+body {
+    font-family: 'Pretendard';
+    font-size: 15pt;
+}
+
+h1 {
+    font-family: 'KingSejongInstitute';
+    font-size: 25pt;
+    text-align: center;
+}
+
+.h1-little {
+    font-size: 17pt;
+}
+
+button {
+    background-color: #243642;
+    color: white;
+    text-align: center;
+    border: none;
+    text-decoration: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: inherit;
+}

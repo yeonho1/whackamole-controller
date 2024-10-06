@@ -22,7 +22,7 @@ function createWindow() {
 
     // and load the index.html of the app.
     mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'index.html'),
+        pathname: path.join(__dirname, 'port-select/index.html'),
         protocol: 'file:',
         slashes: true
     }))
@@ -51,6 +51,16 @@ app.on('ready', () => {
             else return {ports}
         })
         evt.reply('replySerialPortList', data);
+    })
+
+    ipcMain.on('selectSerialPort', (evt, p) => {
+        console.log(`Serial port selected: ${p}`);
+        console.log(`sender: ${evt.sender}`)
+        evt.sender.loadURL(url.format({
+            pathname: path.join(__dirname, 'game/index.html'),
+            protocol: 'file:',
+            slashes: true
+        }))
     })
 })
 
