@@ -1,0 +1,65 @@
+body {
+    font-family: 'Pretendard';
+    font-size: 15pt;
+}
+
+table {
+    width: 100%;
+}
+
+td, th {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+td {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+td.button {
+    padding: 5px;
+}
+
+h1 {
+    font-family: 'KingSejongInstitute';
+    font-size: 25pt;
+    text-align: center;
+}
+
+.h1-little {
+    font-size: 17pt;
+}
+
+.center {
+    text-align: center;
+}
+
+td.center {
+    vertical-align: middle;
+}
+
+.portpath {
+    font-family: 'D2coding ligature';
+}
+
+button {
+    background-color: #243642;
+    color: white;
+    text-align: center;
+    border: none;
+    text-decoration: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+table {
+    margin-bottom: 10px;
+}
+
+button.full {
+    width: 100%;
+    height: 100%;
+}

@@ -2,35 +2,39 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-const { SerialPort } = require('serialport')
-const tableify = require('tableify')
+const { ipcRenderer } = require('electron');
 
-async function listSerialPorts() {
-  await SerialPort.list().then((ports, err) => {
-    if(err) {
-      document.getElementById('error').textContent = err.message
-      return
-    } else {
-      document.getElementById('error').textContent = ''
-    }
-    console.log('ports', ports);
-
-    if (ports.length === 0) {
-      document.getElementById('error').textContent = 'No ports discovered'
-    }
-
-    tableHTML = tableify(ports)
-    document.getElementById('ports').innerHTML = tableHTML
-  })
+const createButtonHTML = (id, text) => {
+  return `<button class="full" id="select-${id}" onclick="selectPort(${id})">${text}</button>`;
 }
 
-function listPorts() {
-  listSerialPorts();
-  setTimeout(listPorts, 2000);
+let portList;
+
+const renderSerialPortList = () => {
+  if (portList.length === 0) {
+    document.getElementById('error').textContent = 'No ports discovered'
+  }
+  let tableHTML = '';
+  portList.forEach((x, id) => {
+    tableHTML += `<tr><td class="portpath">${x.path}</td><td class="center button">${createButtonHTML(id, '선택')}</td></tr>`;
+  });
+  document.getElementById('ports-list').innerHTML = tableHTML;
 }
 
-// Set a timeout that will check for new serialPorts every 2 seconds.
-// This timeout reschedules itself.
-setTimeout(listPorts, 2000);
+const selectPort = (id) => {
+  document.getElementById("selected-port").innerHTML = portList[id].path || "오류: 잘못된 선택입니다.";
+}
 
-listSerialPorts()
+const requestSerialPortList = () => {
+  ipcRenderer.send('getSerialPortList', '');
+}
+
+ipcRenderer.on('replySerialPortList', (evt, payload) => {
+  if (payload.error) {
+    document.getElementById('error').textContent = payload.error
+  }
+  portList = payload.ports || [];
+  renderSerialPortList();
+})
+
+requestSerialPortList();

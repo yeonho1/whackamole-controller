@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!!</title>
+    <title>두더지 잡기 게임</title>
+    <link rel="stylesheet" href="style.css">
     <style>
         table { border-collapse: collapse; }
         table, th, td { border: 1px solid black; }
@@ -11,12 +12,23 @@
 </head>
 
 <body>
-    <h1>Hello World!</h1>
+    <h1>두더지 잡기 게임 <span class="h1-little">by. 휘문고등학교 기계공학부</span></h1>
 
-    We are using Node.js <span id="node-version"></span>, Chromium <span id="chrome-version"></span>, Electron <span id="electron-version"></span>, and Serialport <span id="serialport-version"></span>
+    <p>Arduino가 연결된 시리얼 포트를 선택해 주십시오.</p>
+    <p>버전 정보: Node.js <span id="node-version"></span>, Chromium <span id="chrome-version"></span>, Electron <span id="electron-version"></span>, and Serialport <span id="serialport-version"></span></p>
 
     <div id="error"></div>
-    <div id="ports"></div>
+    <table id="ports">
+        <thead>
+            <tr>
+                <th>경로</th>
+                <th style="width: 100px;">선택</th>
+            </tr>
+        </thead>
+        <tbody id="ports-list"></tbody>
+    </table>
+    <button id="refresh-list" onclick="requestSerialPortList()">새로고침</button>
+    <p>선택된 포트: <span id="selected-port" class="portpath"></span></p>
 </body>
 
 <script src="./renderer.js"></script>
