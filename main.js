@@ -7,6 +7,49 @@ const { SerialPort } = require('serialport');
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 let selectedSerial
+let serialport
+let gameStatus = {
+    ongoing: false,
+    blueScore: 0,
+    redScore: 0
+}
+let ledStatus = [
+    false, false, false, false,
+    false, false, false, false
+]
+let ledTimeouts = [
+    undefined, undefined, undefined, undefined,
+    undefined, undefined, undefined, undefined
+]
+
+const resetGame = () => {
+    gameStatus.blueScore = 0
+    gameStatus.redScore = 0
+    mainWindow.webContents.send('gameStatus', gameStatus)
+}
+
+const startGame = () => {
+    if(!mainWindow) {
+        return
+    }
+    mainWindow.webContents.send('startGame', '')
+    gameStatus.ongoing = true
+    resetGame()
+    setTimeout(endGame, 30000);
+    // TODO
+}
+
+const endGame = () => {
+    if (!mainWindow) return
+    mainWindow.webContents.send('endGame', '')
+    for (let i = 0; i < ledTimeouts.length; i++) {
+        ledControl(i, false)
+        if (ledTimeouts[i]) {
+            clearTimeout(ledTimeouts[i])
+            ledTimeouts[i] = undefined
+        }
+    }
+}
 
 const loadScreen = (w, name) => {
     w.loadURL(url.format({
@@ -61,6 +104,10 @@ app.on('ready', () => {
         console.log(`Serial port selected: ${p}`);
         console.log(`sender: ${evt.sender}`)
         selectedSerial = p
+        // serialport = new SerialPort({
+        //     path: p,
+        //     baudRate: 115200
+        // })
         loadScreen(evt.sender, 'game')
     })
 
@@ -69,8 +116,25 @@ app.on('ready', () => {
     })
 
     ipcMain.on('viewSerialSelectScreen', (evt, p) => {
+        selectedSerial = undefined
+        if (serialport) {
+            serialport.close((err) => {
+                console.log('Closing Serial')
+                if (err) {
+                    console.log(`Error while closing Serial: ${err}`)
+                }
+            })
+        }
+        serialport = undefined
         loadScreen(evt.sender, 'port-select')
     })
+
+    ipcMain.on('serialHandshake', (evt, p) => {
+        console.log(JSON.stringify({'type': 'HNDSHK'}))
+    })
+
+    ipcMain.on('requestGameStart', (evt, p) => { startGame() })
+    ipcMain.on('requestGameAbort', (evt, p) => { endGame() })
 })
 
 // Quit when all windows are closed.

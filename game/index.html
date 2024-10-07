@@ -13,8 +13,8 @@
     <table class="scoreboard">
         <thead>
             <tr>
-                <th>BLUE</th>
-                <th>RED</th>
+                <th id="blue-head">BLUE</th>
+                <th id="red-head">RED</th>
             </tr>
         </thead>
         <tbody>
@@ -27,8 +27,9 @@
     <table>
         <tbody>
             <tr>
-                <td><button class="full">게임 시작하기</button></td>
-                <td><button class="full red" disabled>게임 종료하기</button></td>
+                <td><button id="btn-start" class="full" onclick="startClick()">게임 시작하기</button></td>
+                <td><button id="btn-abort" class="full red" onclick="endClick()" disabled>게임 종료하기</button></td>
+                <td><button id="btn-reset" class="full grey" onclick="resetClick()">초기화</button></td>
             </tr>
         </tbody>
     </table>

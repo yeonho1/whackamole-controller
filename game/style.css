@@ -47,12 +47,32 @@ table.scoreboard > tbody {
     height: 600px;
 }
 
+#blue-head, #blue-score {
+    border-right: 10px solid #F2E5BF;
+}
+
+#red-head, #red-score {
+    border-right: 10px solid #F2E5BF;
+}
+
+.pad {
+    padding: 0 15px;
+}
+
+div {
+    height: 100%;
+}
+
 button.full {
     width: 100%;
 }
 
 button.red {
     background-color: #D91656;
+}
+
+button.grey {
+    background-color: #3C3D37;
 }
 
 button:disabled {
