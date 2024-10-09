@@ -5,7 +5,12 @@ const { SerialPort, ReadlineParser } = require('serialport');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-const BUTTONS_PER_PL = 1
+const isPrototype = true
+
+const [BUTTONS_PER_PL, MIN_FIRST, MAX_FIRST] =
+    (isPrototype) ? [1, [1000], [1500]] : [4, [1000, 2500, 3500, 4500], [2000, 3000, 4000, 5000]]
+const PHASE_MIN = [3000, 2500, 2000, 1500, 1000]
+const PHASE_MAX = [5000, 4000, 3500, 3000, 2000]
 
 let mainWindow
 let selectedSerial
@@ -19,10 +24,26 @@ let gameStatus = {
 let ledStatus = Array(BUTTONS_PER_PL * 2).fill(false)
 let ledTimeouts = Array(BUTTONS_PER_PL * 2).fill(undefined)
 let team = Array(BUTTONS_PER_PL * 2).fill('blue', 0, BUTTONS_PER_PL).fill('red', BUTTONS_PER_PL)
+let phase = Array(BUTTONS_PER_PL * 2).fill(0)
 let handshakeTimeout
 
-const randomTime = (min, max) => {
-    return min + Math.ceil(Math.random() * (max - min))
+const randomInt = (min, max) => {
+    return min + Math.floor(Math.random() * (max - min + 1))
+}
+
+const shuffle = (array) => {
+    let currentIndex = array.length
+    while (currentIndex > 0) {
+        let randomIndex = randomInt(0, currentIndex - 1)
+        currentIndex--
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]]
+    }
+    return array
+}
+
+const range = (start, end, step = 1) => {
+    return Array(end - start + 1).fill().map((_, idx) => start + idx * step)
 }
 
 const sendSerial = (payload) => {
@@ -34,6 +55,7 @@ const sendSerial = (payload) => {
 const resetGame = () => {
     gameStatus.blueScore = 0
     gameStatus.redScore = 0
+    phase.fill(0)
     mainWindow.webContents.send('gameStatus', gameStatus)
 }
 
@@ -58,7 +80,7 @@ const scheduleNextMole = (id, min, max) => {
     if (ledTimeouts[id]) {
         clearTimeout(ledTimeouts[id])
     }
-    ledTimeouts[id] = setTimeout(() => {mole(id)}, randomTime(min, max))
+    ledTimeouts[id] = setTimeout(() => {mole(id)}, randomInt(min, max))
 }
 
 const startGame = () => {
@@ -69,10 +91,14 @@ const startGame = () => {
     gameStatus.ongoing = true
     resetGame()
     setTimeout(endGame, 30000);
-    for (let i = 0; i < ledTimeouts.length; i++) {
-        ledControl(i, false)
-        scheduleNextMole(i, 1000, 3000)
-    }
+    const blueShuffle = shuffle(range(0, BUTTONS_PER_PL - 1))
+    const redShuffle = shuffle(range(BUTTONS_PER_PL, 2 * BUTTONS_PER_PL - 1))
+    blueShuffle.forEach((led, idx) => {
+        scheduleNextMole(led, MIN_FIRST[idx], MAX_FIRST[idx])
+    });
+    redShuffle.forEach((led, idx) => {
+        scheduleNextMole(led, MIN_FIRST[idx], MAX_FIRST[idx])
+    });
 }
 
 const endGame = () => {
@@ -109,7 +135,10 @@ const eventHandlers = {
             gameStatus[`${team[id]}Score`]++
             mainWindow.webContents.send('gameStatus', gameStatus)
             ledControl(id, false)
-            scheduleNextMole(id, 2000, 5000)
+            scheduleNextMole(id, PHASE_MIN[phase[id]], PHASE_MAX[phase[id]])
+            if (phase[id] < PHASE_MIN.length - 1) {
+                phase[id]++
+            }
         }
     }
 }
@@ -219,6 +248,7 @@ app.on('ready', () => {
 
     ipcMain.on('requestGameStart', (evt, p) => { startGame() })
     ipcMain.on('requestGameAbort', (evt, p) => { endGame() })
+    ipcMain.on('requestGameReset', (evt, p) => { resetGame() })
 })
 
 // Quit when all windows are closed.

@@ -64,10 +64,10 @@ ipcRenderer.on('endGame', (evt, p) => {
 
 ipcRenderer.on('gameStatus', (evt, p) => {
     gameStatus = p
-    if (gameStatus.blueScore) {
+    if (typeof gameStatus.blueScore !== "undefined") {
         document.getElementById('blue-score').textContent = gameStatus.blueScore
     }
-    if (gameStatus.redScore) {
+    if (typeof gameStatus.redScore !== "undefined") {
         document.getElementById('red-score').textContent = gameStatus.redScore
     }
 })
