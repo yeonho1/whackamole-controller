@@ -1,7 +1,7 @@
 {
-  "name": "electron-serialport",
+  "name": "whackamole-controller",
   "version": "1.0.2",
-  "description": "A minimal Electron application with node serialport",
+  "description": "Whack A Mole Game by Mechanical Engineering Club of Whimoon High School",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
