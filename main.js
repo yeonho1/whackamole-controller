@@ -1,31 +1,64 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 const url = require('url')
-const { SerialPort } = require('serialport');
+const { SerialPort, ReadlineParser } = require('serialport');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
+const BUTTONS_PER_PL = 1
+
 let mainWindow
 let selectedSerial
-let serialport
+let serialComm
+let serialReady = false
 let gameStatus = {
     ongoing: false,
     blueScore: 0,
     redScore: 0
 }
-let ledStatus = [
-    false, false, false, false,
-    false, false, false, false
-]
-let ledTimeouts = [
-    undefined, undefined, undefined, undefined,
-    undefined, undefined, undefined, undefined
-]
+let ledStatus = Array(BUTTONS_PER_PL * 2).fill(false)
+let ledTimeouts = Array(BUTTONS_PER_PL * 2).fill(undefined)
+let team = Array(BUTTONS_PER_PL * 2).fill('blue', 0, BUTTONS_PER_PL).fill('red', BUTTONS_PER_PL)
+let handshakeTimeout
+
+const randomTime = (min, max) => {
+    return min + Math.ceil(Math.random() * (max - min))
+}
+
+const sendSerial = (payload) => {
+    while (!serialReady) {}
+    console.log(payload)
+    serialComm.write(JSON.stringify(payload) + '\n')
+}
 
 const resetGame = () => {
     gameStatus.blueScore = 0
     gameStatus.redScore = 0
     mainWindow.webContents.send('gameStatus', gameStatus)
+}
+
+const ledControl = (id, st) => {
+    ledStatus[id] = st
+    sendSerial({
+        type: "LED",
+        id,
+        state: (st ? 1 : 0)
+    })
+}
+
+const mole = (id) => {
+    ledControl(id, true)
+    ledTimeouts[id] = setTimeout(() => {
+        ledControl(id, false)
+        scheduleNextMole(id, 1000, 5000)
+    }, 5000)
+}
+
+const scheduleNextMole = (id, min, max) => {
+    if (ledTimeouts[id]) {
+        clearTimeout(ledTimeouts[id])
+    }
+    ledTimeouts[id] = setTimeout(() => {mole(id)}, randomTime(min, max))
 }
 
 const startGame = () => {
@@ -36,11 +69,16 @@ const startGame = () => {
     gameStatus.ongoing = true
     resetGame()
     setTimeout(endGame, 30000);
-    // TODO
+    for (let i = 0; i < ledTimeouts.length; i++) {
+        ledControl(i, false)
+        scheduleNextMole(i, 1000, 3000)
+    }
 }
 
 const endGame = () => {
     if (!mainWindow) return
+    gameStatus.ongoing = false
+    mainWindow.webContents.send('gameStatus', gameStatus)
     mainWindow.webContents.send('endGame', '')
     for (let i = 0; i < ledTimeouts.length; i++) {
         ledControl(i, false)
@@ -49,6 +87,51 @@ const endGame = () => {
             ledTimeouts[i] = undefined
         }
     }
+}
+
+const handshake = () => {
+    sendSerial({'type': 'HNDSHK'})
+    handshakeTimeout = setTimeout(handshake, 2000)
+}
+
+const eventHandlers = {
+    HNDSHK: (data) => {
+        clearTimeout(handshakeTimeout)
+        handshakeTimeout = undefined
+        mainWindow.webContents.send('replySerialHandshake', data)
+    },
+    BTNPRS: (data) => {
+        if (!gameStatus.ongoing) {
+            return
+        }
+        const id = data["id"]
+        if (ledStatus[id]) {
+            gameStatus[`${team[id]}Score`]++
+            mainWindow.webContents.send('gameStatus', gameStatus)
+            ledControl(id, false)
+            scheduleNextMole(id, 2000, 5000)
+        }
+    }
+}
+
+const handleSerial = (data) => {
+    obj = JSON.parse(data)
+    console.log(obj)
+    if (obj.type && eventHandlers[obj.type]) {
+        eventHandlers[obj.type](obj)
+    }
+}
+
+const parser = new ReadlineParser()
+parser.on('data', handleSerial)
+
+const setupSerial = (path) => {
+    serialComm = new SerialPort({ path, baudRate: 115200 })
+    serialComm.pipe(parser)
+    serialComm.on('open', () => {
+        console.log('Serial ready')
+        serialReady = true
+    })
 }
 
 const loadScreen = (w, name) => {
@@ -102,12 +185,8 @@ app.on('ready', () => {
 
     ipcMain.on('selectSerialPort', (evt, p) => {
         console.log(`Serial port selected: ${p}`);
-        console.log(`sender: ${evt.sender}`)
         selectedSerial = p
-        // serialport = new SerialPort({
-        //     path: p,
-        //     baudRate: 115200
-        // })
+        setupSerial(p)
         loadScreen(evt.sender, 'game')
     })
 
@@ -117,20 +196,25 @@ app.on('ready', () => {
 
     ipcMain.on('viewSerialSelectScreen', (evt, p) => {
         selectedSerial = undefined
-        if (serialport) {
-            serialport.close((err) => {
+        if (serialComm) {
+            serialComm.close((err) => {
                 console.log('Closing Serial')
                 if (err) {
                     console.log(`Error while closing Serial: ${err}`)
                 }
             })
         }
-        serialport = undefined
+        serialReady = false
+        serialComm = undefined
         loadScreen(evt.sender, 'port-select')
     })
 
     ipcMain.on('serialHandshake', (evt, p) => {
-        console.log(JSON.stringify({'type': 'HNDSHK'}))
+        if (handshakeTimeout) {
+            clearTimeout(handshakeTimeout)
+            handshakeTimeout = undefined
+        }
+        handshake()
     })
 
     ipcMain.on('requestGameStart', (evt, p) => { startGame() })

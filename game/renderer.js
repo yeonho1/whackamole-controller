@@ -37,8 +37,9 @@ const resetClick = () => {
     ipcRenderer.send('requestGameReset', '')
 }
 
-ipcRenderer.on('replySerialHandshake', (evt, payload) => {
-    // todo
+ipcRenderer.on('replySerialHandshake', (evt, p) => {
+    document.getElementById('arduino-status').textContent =
+        (p.payload === 'ready') ? '준비됨' : '확인 실패'
 })
 
 ipcRenderer.on('startGame', (evt, p) => {
